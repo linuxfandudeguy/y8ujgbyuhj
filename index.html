@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Reddit Post</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Random Reddit Post</h1>
+        <div class="form-group">
+            <label for="username">Enter Reddit Username:</label>
+            <input type="text" class="form-control" id="username" placeholder="Enter username">
+        </div>
+        <button class="btn btn-primary mb-4" onclick="getRandomPost()">Get Random Post</button>
+        <div id="postContainer"></div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function getRandomPost() {
+            var username = document.getElementById('username').value.trim();
+            if (username === '') {
+                alert('Please enter a username.');
+                return;
+            }
+            $.getJSON('https://www.reddit.com/user/' + username + '/submitted.json?limit=100', function(data) {
+                if (data.data.children.length === 0) {
+                    alert('No posts found for this user.');
+                    return;
+                }
+                var randomIndex = Math.floor(Math.random() * data.data.children.length);
+                var randomPost = data.data.children[randomIndex].data;
+                var postTitle = randomPost.title;
+                var postUrl = 'https://www.reddit.com' + randomPost.permalink;
+                var postImage = randomPost.url;
+                var postHtml = '<div class="card">';
+                if (postImage && (postImage.endsWith(".jpg") || postImage.endsWith(".png") || postImage.endsWith(".gif"))) {
+                    postHtml += '<img src="' + postImage + '" class="card-img-top" alt="Post Image">';
+                }
+                postHtml += '<div class="card-body"><h5 class="card-title">' + postTitle + '</h5><a href="' + postUrl + '" class="card-link">View Post</a></div></div>';
+                $('#postContainer').html(postHtml);
+            }).fail(function() {
+                alert('Failed to fetch data. Please try again later.');
+            });
+        }
+    </script>
+</body>
+</html>
